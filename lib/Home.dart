@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:images_to_firebasestorage/auth/firebase_storage_methods.dart';
 class Home extends StatefulWidget {
 
   const Home({super.key});
@@ -11,6 +13,7 @@ class Home extends StatefulWidget {
 }
 Uint8List? _img;
 class _HomeState extends State<Home> {
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +40,7 @@ class _HomeState extends State<Home> {
                       child: IconButton(onPressed: (){
                         SelectImage();
 
+
                       }, icon: const Icon(Icons.add_a_photo,size: 30,color: Colors.white,))),
 
 
@@ -46,7 +50,19 @@ class _HomeState extends State<Home> {
             SizedBox(height: 30,),
             ElevatedButton(
 
-                onPressed: (){}, child: Text("Upload Now"))
+                onPressed: ()async{
+
+
+                  // calling the method that will save the img to database storage and this method is returning the downloadURL that we want to save in Firebase Storage
+                  // that's why we will save the return value in a String
+
+                  String downloadImageURL = await StorageMethod().uploadImagetodatabase("testImage", _img!);
+                  // Sending the downloadImageURL to fire store
+                  _firestore.collection("Users").doc("2394203422934").set({
+                    'downloadImamgeURLforImage': downloadImageURL,
+                  });
+
+                }, child: Text("Upload Now"))
           ],
         ),
       ),
